@@ -416,13 +416,31 @@ pos1 x = bitSearch testBit x hexBitSeq
 pos0 :: Hex -> [Int]
 pos0 x = bitSearch testBit (inv x) hexBitSeq
 
+-- | Get the first and last items from a list
+--
+-- >>> headAndLast []
+-- Report exception
+-- >>> headAndLast [1]
+-- (1,1)
+-- >>> headAndLast [1, 2, 3]
+-- (1,3)
+headAndLast :: [Int] -> (Int, Int)
+headAndLast []     = error "Can't get the first and last items from an empty list"
+headAndLast [x]    = (x, x)  -- Single element case
+headAndLast (x:xs) = (x, lastItem xs)
+  where
+    lastItem [y]    = y       -- Last element in a list of one element
+    lastItem (_:ys) = lastItem ys  -- Recursively find the last item
+
 -- | Get upper and lower boundaries of asserted bits
 --
 -- >>> range1 0x0f000000
 -- (27,24)
 range1 :: Hex -> (Int,Int)
-range1 x = let y = pos1 x
-           in  (head y, last y)
+range1 x
+    | x == 0 = error "Can't apply `range1` to 0"
+    | x > 0 = let y = pos1 x
+           in headAndLast y
 
 -- | Count bit-1
 --
